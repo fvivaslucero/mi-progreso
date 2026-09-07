@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#5b5bd6">
+<title>Mi Progreso</title>
+<style>
+:root{--bg:#f5f6fa;--card:#fff;--text:#202432;--muted:#73798a;--line:#e4e6ee;--a:#5b5bd6;--a2:#eeeeff;--ok:#27a65b;--bad:#e45151}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{padding-bottom:env(safe-area-inset-bottom)}button,input,textarea,select{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:1050px;margin:auto;padding:18px 14px 45px}
+header{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:16px}
+h1{margin:0;font-size:28px}h2{margin:0;font-size:18px}.sub{color:var(--muted);font-size:13px;margin-top:4px}
+.month{display:flex;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px}
+.month button{background:transparent;border:0;width:40px;height:40px;font-size:25px;border-radius:10px}.month button:active{background:var(--a2)}
+.month select{border:0;background:transparent;font-weight:750;outline:0;padding:7px;min-width:145px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:17px}
+.stat{padding:15px}.stat small{color:var(--muted)}.num{font-size:25px;font-weight:800;margin-top:4px}
+.card{padding:17px;margin-bottom:14px}.head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}
+.btn{background:var(--a);color:white;border:0;border-radius:11px;padding:10px 13px;font-weight:750}.btn.secondary{background:var(--a2);color:var(--a)}
+.table{overflow:auto;border:1px solid var(--line);border-radius:12px;max-height:62vh}
+table{border-collapse:separate;border-spacing:0;min-width:max-content;width:100%}th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:5px;text-align:center;background:white}
+th{background:#fafaff;color:var(--muted);font-size:11px;position:sticky;top:0;z-index:4}.name{position:sticky;left:0;z-index:5;min-width:180px;text-align:left;background:white!important}
+th.name{z-index:6;background:#fafaff!important}.day{font-weight:800;color:var(--text);display:block}.wd{font-size:9px}
+.box{width:34px;height:34px;border:1px solid #dfe1e8;background:#f2f3f7;border-radius:9px}.box.done{background:var(--ok);border-color:var(--ok);color:#fff}.box.done:after{content:"✓";font-weight:900}
+.hname{font-weight:700}.actions{float:right}.x{border:0;background:transparent;color:#a0a5b3;font-size:16px;margin-left:4px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.chart{height:250px;display:flex;align-items:end;gap:5px;overflow-x:auto;padding:8px 2px}.barcol{min-width:19px;height:100%;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:4px}.bar{width:18px;border-radius:5px 5px 2px 2px;background:var(--a);min-height:2px}.barlabel{font-size:9px;color:var(--muted)}
+.goals{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:9px}.goal{display:flex;gap:10px;align-items:center;border:1px solid var(--line);padding:12px;border-radius:13px}.goal.done{background:#f1fbf4}.gcheck{width:27px;height:27px;border-radius:8px;border:1px solid #ccd0da;background:#fff}.gcheck.done{background:var(--ok);color:white}.gcheck.done:after{content:"✓"}.gtext{flex:1}.goal.done .gtext{text-decoration:line-through;color:var(--muted)}
+textarea{width:100%;min-height:95px;border:1px solid var(--line);border-radius:12px;padding:11px;resize:vertical;outline:none;font-size:16px}.reflection{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.reflection label{font-size:13px;font-weight:700}
+.modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;padding:15px;z-index:20}.modal.show{display:flex}.modalbox{width:min(430px,100%);background:white;border-radius:18px;padding:20px}.modalbox input{width:100%;padding:13px;border:1px solid var(--line);border-radius:11px;font-size:16px;margin:10px 0 14px;outline:none}.modalactions{display:flex;justify-content:flex-end;gap:8px}
+@media(max-width:700px){.wrap{padding:calc(14px + env(safe-area-inset-top)) 10px 35px}header{align-items:flex-start;flex-direction:column}.month{width:100%}.month select{flex:1;text-align:center}.stats{grid-template-columns:repeat(2,1fr)}.stat{padding:12px}.num{font-size:22px}.card{padding:13px}.reflection{grid-template-columns:1fr}.name{min-width:160px}.head{align-items:flex-start}.head .btn{white-space:nowrap}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div><h1>🌱 Mi Progreso</h1><div class="sub">Un día a la vez. Mejorá sin buscar la perfección.</div></div>
+<div class="month"><button id="prev">‹</button><select id="month"></select><button id="next">›</button></div>
+</header>
+
+<div class="stats">
+<div class="stat"><small>Cumplimiento</small><div class="num" id="pct">0%</div></div>
+<div class="stat"><small>Hábitos hechos</small><div class="num" id="done">0</div></div>
+<div class="stat"><small>Mejor día</small><div class="num" id="best">—</div></div>
+<div class="stat"><small>Objetivos</small><div class="num" id="goalsStat">0/0</div></div>
+</div>
+
+<section class="card">
+<div class="head"><div><h2>✅ Hábitos</h2><div class="sub">Deslizá horizontalmente para ver todos los días.</div></div><button class="btn" id="newHabit">+ Agregar</button></div>
+<div id="habitArea"></div>
+</section>
+
+<section class="card">
+<div class="head"><h2>📊 Hábitos por día</h2></div>
+<div id="chart" class="chart"></div>
+</section>
+
+<section class="card">
+<div class="head"><h2>🎯 Objetivos del mes</h2><button class="btn" id="newGoal">+ Agregar</button></div>
+<div id="goalArea"></div>
+</section>
+
+<section class="card">
+<div class="head"><h2>📝 Reflexión del mes</h2></div>
+<div class="reflection">
+<div><label>¿Qué hice bien?</label><textarea id="rGood" placeholder="Tus logros..."></textarea></div>
+<div><label>¿Qué puedo mejorar?</label><textarea id="rImprove" placeholder="Algo concreto..."></textarea></div>
+<div><label>¿Qué quiero conseguir?</label><textarea id="rNext" placeholder="Para el próximo mes..."></textarea></div>
+</div>
+</section>
+</div>
+
+<div class="modal" id="modal"><div class="modalbox"><h2 id="modalTitle">Agregar</h2><input id="modalInput" maxlength="80" placeholder="Escribí acá"><div class="modalactions"><button class="btn secondary" id="cancel">Cancelar</button><button class="btn" id="confirm">Guardar</button></div></div></div>
+
+<script>
+(function(){
+"use strict";
+const months=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const weekdays=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+const KEY="miProgresoV2";
+let store={}; try{store=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){store={}};
+let selected=new Date(); selected=new Date(selected.getFullYear(),selected.getMonth(),1);
+let mode=null, modeIndex=-1;
+
+const $=id=>document.getElementById(id);
+function monthKey(){return selected.getFullYear()+"-"+String(selected.getMonth()+1).padStart(2,"0")}
+function days(){return new Date(selected.getFullYear(),selected.getMonth()+1,0).getDate()}
+function state(){
+ const k=monthKey();
+ if(!store[k]) store[k]={habits:[],checks:{},goals:[],reflection:{good:"",improve:"",next:""}};
+ return store[k];
+}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+function renderMonth(){
+ $("month").innerHTML="";
+ months.forEach((m,i)=>{const o=document.createElement("option");o.value=i;o.textContent=m+" "+selected.getFullYear();if(i===selected.getMonth())o.selected=true;$("month").appendChild(o)});
+}
+function renderHabits(){
+ const s=state(), n=days();
+ if(!s.habits.length){$("habitArea").innerHTML='<div class="empty">Todavía no tenés hábitos. Tocá <b>+ Agregar</b> para empezar.</div>';return}
+ let out='<div class="table"><table><thead><tr><th class="name">Hábito</th>';
+ for(let d=1;d<=n;d++){const dt=new Date(selected.getFullYear(),selected.getMonth(),d);out+=`<th><span class="day">${d}</span><span class="wd">${weekdays[dt.getDay()]}</span></th>`}
+ out+="</tr></thead><tbody>";
+ s.habits.forEach((h,i)=>{out+=`<tr><td class="name"><span class="hname">${esc(h)}</span><span class="actions"><button class="x" data-action="rename" data-i="${i}">✎</button><button class="x" data-action="delete" data-i="${i}">×</button></span></td>`;
+ for(let d=1;d<=n;d++){const yes=!!(s.checks[d]&&s.checks[d][i]);out+=`<td><button class="box ${yes?"done":""}" data-action="check" data-d="${d}" data-i="${i}"></button></td>`}out+="</tr>"});
+ $("habitArea").innerHTML=out+"</tbody></table></div>";
+}
+function renderGoals(){
+ const s=state(); if(!s.goals.length){$("goalArea").innerHTML='<div class="empty">Todavía no agregaste objetivos para este mes.</div>';return}
+ $("goalArea").innerHTML='<div class="goals">'+s.goals.map((g,i)=>`<div class="goal ${g.done?"done":""}"><button class="gcheck ${g.done?"done":""}" data-action="goal" data-i="${i}"></button><div class="gtext">${esc(g.text)}</div><button class="x" data-action="goalDelete" data-i="${i}">×</button></div>`).join("")+"</div>";
+}
+function renderReflection(){const r=state().reflection;$("rGood").value=r.good||"";$("rImprove").value=r.improve||"";$("rNext").value=r.next||""}
+function renderStats(){
+ const s=state(),n=days(),total=s.habits.length*n;let done=0,best=0,counts=[];
+ for(let d=1;d<=n;d++){let c=0;for(let i=0;i<s.habits.length;i++)if(s.checks[d]&&s.checks[d][i])c++;counts.push(c);done+=c;if(c>best)best=c}
+ $("pct").textContent=(total?Math.round(done/total*100):0)+"%";$("done").textContent=done;$("best").textContent=best||"—";$("goalsStat").textContent=s.goals.filter(g=>g.done).length+"/"+s.goals.length;
+ $("chart").innerHTML="";
+ const max=Math.max(1,s.habits.length);
+ counts.forEach((v,i)=>{const col=document.createElement("div");col.className="barcol";const b=document.createElement("div");b.className="bar";b.style.height=(v/max*88+2)+"%";b.title="Día "+(i+1)+": "+v+" hábitos";const l=document.createElement("div");l.className="barlabel";l.textContent=i+1;col.append(b,l);$("chart").appendChild(col)})
+}
+function render(){renderMonth();renderHabits();renderGoals();renderReflection();renderStats()}
+function openModal(title,type,index=-1,value=""){mode=type;modeIndex=index;$("modalTitle").textContent=title;$("modalInput").value=value;$("modal").classList.add("show");setTimeout(()=>$("modalInput").focus(),50)}
+function closeModal(){$("modal").classList.remove("show");mode=null;modeIndex=-1}
+function confirmModal(){const text=$("modalInput").value.trim();if(!text)return;const s=state();if(mode==="habit")s.habits.push(text);else if(mode==="goal")s.goals.push({text,done:false});else if(mode==="rename")s.habits[modeIndex]=text;persist();closeModal();render()}
+
+$("newHabit").onclick=()=>openModal("Nuevo hábito","habit");
+$("newGoal").onclick=()=>openModal("Nuevo objetivo","goal");
+$("confirm").onclick=confirmModal;$("cancel").onclick=closeModal;
+$("modal").onclick=e=>{if(e.target===$("modal"))closeModal()};
+$("prev").onclick=()=>{selected=new Date(selected.getFullYear(),selected.getMonth()-1,1);render()};
+$("next").onclick=()=>{selected=new Date(selected.getFullYear(),selected.getMonth()+1,1);render()};
+$("month").onchange=e=>{selected=new Date(selected.getFullYear(),Number(e.target.value),1);render()};
+
+$("habitArea").onclick=e=>{
+ const b=e.target.closest("button[data-action]");if(!b)return;
+ const s=state(),a=b.dataset.action,i=Number(b.dataset.i);
+ if(a==="check"){const d=Number(b.dataset.d);s.checks[d]=s.checks[d]||{};s.checks[d][i]=!s.checks[d][i];persist();renderHabits();renderStats()}
+ if(a==="delete"){if(confirm("¿Eliminar este hábito?")){s.habits.splice(i,1);Object.keys(s.checks).forEach(d=>{const x={};Object.keys(s.checks[d]).forEach(k=>{const j=Number(k);if(j<i)x[j]=s.checks[d][k];if(j>i)x[j-1]=s.checks[d][k]});s.checks[d]=x});persist();render()}}
+ if(a==="rename")openModal("Renombrar hábito","rename",i,s.habits[i]);
+};
+$("goalArea").onclick=e=>{
+ const b=e.target.closest("button[data-action]");if(!b)return;const s=state(),i=Number(b.dataset.i),a=b.dataset.action;
+ if(a==="goal"){s.goals[i].done=!s.goals[i].done;persist();renderGoals();renderStats()}
+ if(a==="goalDelete"){if(confirm("¿Eliminar este objetivo?")){s.goals.splice(i,1);persist();renderGoals();renderStats()}}
+};
+["rGood","rImprove","rNext"].forEach(id=>$(id).addEventListener("input",()=>{const r=state().reflection;r.good=$("rGood").value;r.improve=$("rImprove").value;r.next=$("rNext").value;persist()}));
+$("modalInput").addEventListener("keydown",e=>{if(e.key==="Enter")confirmModal()});
+render();
+})();
+</script>
+</body>
+</html>
